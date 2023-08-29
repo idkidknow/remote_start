@@ -1,0 +1,19 @@
+[workspace]
+members = [".", "api", "common"]
+
+[package]
+name = "remote_start"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = {workspace = true}
+dotenvy = "0.15.7"
+api = { path = "api" }
+common = { workspace = true }
+
+[workspace.dependencies]
+tokio = { version = "1.32.0", features = ["full"] }
+common = { path = "common" }
