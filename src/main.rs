@@ -2,7 +2,8 @@ use api;
 use colored::Colorize;
 use common::error::Error;
 use dotenvy;
-use tokio::{sync::{Notify, watch}, process::Command};
+use tokio::{sync::{Notify, watch}, process::Command, select};
+use tokio::io::{self, AsyncReadExt};
 use std::{env, net::SocketAddr, str::FromStr, sync::Arc, process::ExitStatus};
 
 #[tokio::main]
@@ -67,8 +68,13 @@ async fn subprocess_loop(command: &str, notify: Arc<Notify>, started_sender: wat
                 println!("{}", status.to_string().red());
             },
         }
-        println!("{}", "Waiting for request".cyan());
-        notify.notified().await;
+        println!("{}", "Waiting for request. Press enter to skip waiting.".cyan());
+        let mut reader = io::BufReader::new(io::stdin());
+        let mut buf = [0u8; 1];
+        select! {
+            Ok(_) = reader.read(&mut buf) => {},
+            _ = notify.notified() => {},
+        }
     }
 }
 
@@ -86,6 +92,16 @@ async fn run_command(command: &str) -> Result<ExitStatus, Error> {
 async fn run_command(command: &str) -> Result<ExitStatus, Error> {
     let status = Command::new("cmd")
         .args(["/C", command])
+        .spawn()?
+        .wait()
+        .await?;
+    Ok(status)
+}
+
+#[cfg(target_os = "macos")]
+async fn run_command(command: &str) -> Result<ExitStatus, Error> {
+    let status = Command::new("sh")
+        .args(["-c", command])
         .spawn()?
         .wait()
         .await?;
