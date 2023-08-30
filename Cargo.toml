@@ -13,6 +13,7 @@ tokio = {workspace = true}
 dotenvy = "0.15.7"
 api = { path = "api" }
 common = { workspace = true }
+colored = "2.0.4"
 
 [workspace.dependencies]
 tokio = { version = "1.32.0", features = ["full"] }

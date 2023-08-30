@@ -1,4 +1,5 @@
 use api;
+use colored::Colorize;
 use common::error::Error;
 use dotenvy;
 use tokio::{sync::Notify, process::Command};
@@ -12,7 +13,7 @@ async fn main() -> Result<(), Error> {
     let notify = Arc::new(Notify::new());
     let notify2 = notify.clone();
     let api_task = tokio::spawn(async move {
-        println!("Listening {}", socket_addr);
+        println!("Listening {}", socket_addr.to_string().cyan());
         api::start(socket_addr, notify).await
     });
     let command_task = tokio::spawn(async move {
@@ -60,10 +61,10 @@ async fn subprocess_loop(command: &str, notify: Arc<Notify>) {
                 eprintln!("Error when executing command: {}", e);
             },
             Ok(status) => {
-                println!("Exit Status: {}", status);
+                println!("{}", status.to_string().red());
             },
         }
-        println!("Waiting for request");
+        println!("{}", "Waiting for request".cyan());
         notify.notified().await;
     }
 }
