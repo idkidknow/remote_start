@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, sync::Arc};
 
-use axum::{Router, routing::{get, post}, Extension};
+use axum::{Router, routing::get, Extension};
 use common::error::Error;
 use tokio::sync::Notify;
 
@@ -21,7 +21,7 @@ pub async fn start(addr: SocketAddr, notify_for_start: Arc<Notify>) -> Result<()
 
     let app = Router::new()
         .route("/", get(root_handler))
-        .route("/start", post(start_handler))
+        .route("/start", get(start_handler))
         .layer(cors)
         .layer(Extension(state));
     let res = axum::Server::bind(&addr)
